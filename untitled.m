@@ -110,3 +110,23 @@ function [errR, errC, yR] = fourierError(f, K)
     errR = std((yR(2:N)-f(2:N))*scale); % оба края исключены
     errC = std((yC(2:N)-f(2:N))*scale);
 end
+function [errR, errC, yR] = fourierError(f, K)
+    N = numel(f)-1;
+    assert(K < N/4, 'Требуется строгое условие K < N/4.');
+    n = 0:N-1; m = 0:N;
+    meanF = mean(f(1:N));           % крайняя точка f(N+1) не дублируется
+    yR = meanF*ones(1,N+1);
+    yC = yR;
+    for k = 1:K
+        angleN = 2*pi*k*n/N;
+        a = 2*mean(f(1:N).*cos(angleN));
+        b = 2*mean(f(1:N).*sin(angleN));
+        c = mean(f(1:N).*exp(-1i*angleN));
+        angleM = 2*pi*k*m/N;
+        yR = yR + a*cos(angleM) + b*sin(angleM);
+        yC = yC + 2*real(c*exp(1i*angleM));
+    end
+    scale = 100/(max(f)-min(f));
+    errR = std((yR(2:N)-f(2:N))*scale); % оба края исключены
+    errC = std((yC(2:N)-f(2:N))*scale);
+end
